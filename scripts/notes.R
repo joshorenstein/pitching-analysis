@@ -1,13 +1,5 @@
-# Count	BattingRuns
-# 0-0	0.000
-# 1-0	0.038
-# 2-0	0.140
-# 3-0	0.220
-# 0-1	-0.044
-# 1-1	-0.015
-# 2-1	0.037
-# 3-1	0.142
-# 0-2	-0.106
-# 1-2	-0.082
-# 2-2	-0.039
-# 3-2	0.059
+install.packages('tidymodels')
+
+3-2	0.059
+
+# Y variable is run value with swing & miss and estimated_woba_using speed angle
