@@ -363,7 +363,7 @@ s <- season_mlb5 %>%
   mutate(whiff=(if_else(description %in% c("swinging_strike_blocked","swinging_strike","missed_bunt"),1,0)))
 s %>% write_csv('raw_data.csv')
 
-sp <- s %>% filter(des2 %in% c("ball","strike")) #data for whiff model
+
 
 #ball_strike data#
 dim(sp)
