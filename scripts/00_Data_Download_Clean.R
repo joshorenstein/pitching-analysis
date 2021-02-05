@@ -180,9 +180,9 @@ mlb_re$RE_diff = mlb_re$RE_after - mlb_re$RE
 
 mlb_re$playRE = mlb_re$RE_diff + mlb_re$runs_scored
 
-mlb_re%>%
-  select(on_1b, on_2b, on_3b, outs_when_up, events, RE, RE_after, RE_diff, runs_scored, playRE)%>%
-  head(15) #makes sure it worked
+# mlb_re%>%
+#   select(on_1b, on_2b, on_3b, outs_when_up, events, RE, RE_after, RE_diff, runs_scored, playRE)%>%
+#   head(15) #makes sure it worked
 
 mlb_LW <- mlb_re%>%
   group_by(des2)%>%
@@ -351,7 +351,7 @@ s <- season_mlb5 %>%
   mutate(whiff=(if_else(description %in% c("swinging_strike_blocked","swinging_strike","missed_bunt"),1,0)))
 
 
-#s %>% write_csv('raw_data.csv') #if you want to save the data uncomment this
+s %>% write_csv('scraps/raw_data.csv') #if you want to save the data uncomment this
 
 
 

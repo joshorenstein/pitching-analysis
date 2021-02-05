@@ -70,7 +70,7 @@ final <- m %>% inner_join(me) %>%
                          (sugg2=="CU" & is.na(xCU)==TRUE),'',sugg2))
 
 #grab some player data
-pirates <- final %>% filter(player_name %in% c("Steven Breault","Chad Kuhl","Mitch Keller",
+pirates <- final %>% filter(player_name %in% c("Steven Brault","Chad Kuhl","Mitch Keller",
                                         "JT Brubaker","Wil Crowe","Richard Rodriguez",
                                         "Chris Stratton","Michael Feliz","Kyle Crick",
                                         "Sam Howard","David Bednar","Carson Fulmer","Luis Oviedo")) 
@@ -79,6 +79,7 @@ mets <- final %>% filter(player_name %in% c("Jacob deGrom","Carlos Carrasco","Ma
                                         "Joey Lucchesi","Edwin Diaz","Jeurys Familia","Trevor May","Miguel Castro",
                                         "Dellin Betances","Robert Gsellman","Aaron Loup","Drew Smith","Brad Brach","Seth Lugo",
                                         "Jacob Barnes","Stephen Tarpley","Corey Oswalt","Trevor Bauer")) 
+#View(pirates)
 #print to csv
-mets %>% write_csv('mets.csv')    
-pirates %>% write_csv('pirates.csv')
+mets %>% write_csv('data/mets.csv')    
+pirates %>% write_csv('data/pirates.csv')
