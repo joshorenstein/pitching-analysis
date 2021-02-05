@@ -1,29 +1,18 @@
-### Step through the whole thing ###
-
-
-## Check PFX and Release Point data, add interaction variable for them in mmodel
-
 # Download Statcast Data 
-# This is primarily Ethan Moore's Pitch-Level code 
-# https://github.com/ethanmoore21/PitchQuality/blob/master/xRV3_2021.R
 
-# My additions are:
-# 1) adding a spin mirroring variable (spin_dir_diff) &
-# 2) a dummy variable for whiffs
-# 3) Added WOBA Run Values
 
 # Overview ----------------------------------------------------------------
 
+# Getting and cleaning the Statcast data is primarily the work of Ethan Moore and Bill Petti
+# https://github.com/ethanmoore21/PitchQuality/blob/master/xRV3_2021.R
 
-#This script contains the final version of my pitch-level model to predict
-# the value of individual MLB pitches on a runs scale. This script is 
-# separated into several sections and is commented to give some idea of 
-# what the code is doing. Enjoy!
-
+# Josh  additions are:
+# 1) adding a spin mirroring variable (spin_dir_diff) &
+# 2) a dummy variable for whiffs
+# 3) Added WOBA Run Values from Dan Meyer's work on Hardball Times
 
 # Libraries --------------------------------------------------------------
 
-#timing!
 start <- proc.time()
 
 library(tidyverse)
@@ -86,7 +75,6 @@ rm(data1, data2, data3, data4, data5, data6, data7, data8) #remove individual da
 #we only have this column for the 2020 season, so skip this if you are using data outside of 2020 and 
 #remove release_spin_direction from feature list in feature_selection() function
 
-here()
 #Add Bill Petti's spin direction data
 spin_direction_pbp <- read.csv("data/spin_direction_pbp.csv")
 
@@ -289,7 +277,6 @@ head(season_mlb)
 rm(a,b,c,mlb_LW, mlb_re, mlb_re2, mlb_re3, mlb2, mlbraw, mlbraw2, BALL_STRIKE_LW)
 
 #Creation of variables like velo_diff and movement diff based on a pitcher's average fastball.
-names(season_mlb)
 p_avgs <- season_mlb%>%
   filter(pitch_type %in% c("FF", "SI"))%>%
   group_by(player_name)%>%
@@ -351,21 +338,20 @@ head(season_mlb5)
 names(season_mlb5)
 rm(season_mlb4)
 names(season_mlb5)
+
 #add whiffs and select columns for model
 s <- season_mlb5 %>% 
   inner_join(run_value) %>% 
   mutate(est_woba = ifelse(des2 %in% c("ball"),woba_ball,
                            ifelse(description %in% c("strike"),woba_strike,estimated_woba_using_speedangle))) %>% #im going to leave this broken for now
-  select(player_name,pitch_type,game_date,release_speed,release_pos_x,balls,strikes,events,description,
+  dplyr::select(player_name,pitch_type,game_date,release_speed,release_pos_x,balls,strikes,events,description,
          release_pos_y,release_pos_z,batter,pitcher,stand,p_throws,release_spin_rate,release_extension,release_spin_direction,lin_weight,
-         velo_diff,hmov_diff,vmov_diff,spin_dir_diff,pfx_x,pfx_z,spin_dir_adj,est_woba,estimated_ba_using_speedangle,
+         velo_diff,hmov_diff,vmov_diff,spin_dir_diff,pfx_x,pfx_z,plate_x,plate_z,spin_dir_adj,est_woba,estimated_ba_using_speedangle,
          estimated_woba_using_speedangle,launch_speed,launch_angle,barrel,des2) %>% 
   mutate(whiff=(if_else(description %in% c("swinging_strike_blocked","swinging_strike","missed_bunt"),1,0)))
-s %>% write_csv('raw_data.csv')
 
 
+#s %>% write_csv('raw_data.csv') #if you want to save the data uncomment this
 
-#ball_strike data#
-dim(sp)
-# dim(s)
+
 

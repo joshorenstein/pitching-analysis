@@ -1,24 +1,16 @@
-#install.packages('neuralnet')
-library(neuralnet)
 library(tidyverse)
 library(psych)
 library(mgcv)
-
 
 df <- sp %>%   #data for fb whiff model %>% 
   filter(pitch_type %in% c("FF","SI")) %>% 
   mutate(sd_i=abs(release_pos_x*pfx_x),
          ht_i=abs(release_pos_z*pfx_z))
-
 names(df)
 train_ind <- sample(seq_len(nrow(df)), size = smp_size)
 
 dim(df)
 
-#shapiro
-shapiro <- floor(0.05 * nrow(df))
-shapiro.test(shapiro$release_speed)
-boxTidwell(whiff~release_speed+release_spin_rate, data=df)
 # Make sure that you get the same random numbers
 smp_size <- floor(1 * nrow(df))
 smp_size
@@ -32,10 +24,9 @@ nrow(train)/nrow(df)
 
 names(train)
 train_select <- train %>% dplyr::select(player_name,pitch_type,p_throws,stand,release_pos_x,
-                                        release_pos_z,
-                                        release_speed,release_spin_rate,release_spin_direction,
+                                        release_pos_z,release_speed,release_spin_rate,release_spin_direction,
                                         hmov_diff,vmov_diff,velo_diff,spin_dir_diff,
-                                        pfx_x,pfx_z,whiff,sd_i,ht_i)
+                                        pfx_x,pfx_z,whiff,plate_x,plate_z)
 
 library(modelr)
 
@@ -44,34 +35,33 @@ train_select %>%
   summarise(n=n()) 
 
 
-#group by and run logistic regressions on fastball data
+#GAM models for fastballs and sinkers
 tr <-  train_select %>%
   filter(pitch_type %in% c("FF","SI")) %>% 
   group_by(pitch_type,p_throws,stand) %>%
   do(fit = gam(whiff ~ release_speed+release_pos_x+release_pos_z+
-                 release_spin_rate+release_spin_direction+pfx_x+pfx_z, data = .,family=binomial))
+                 release_spin_rate+release_spin_direction+pfx_x+pfx_z+plate_x+plate_z, data = .,family=binomial))
 
-library(mgcv)
-# nns5=neuralnet(whiff~release_speed+release_pos_x+release_pos_z+
-#                  release_spin_rate+release_spin_direction+pfx_x+pfx_z,data=train,hidden=5,stepmax = 10^9)
-# plot(nns5)
-#
+
+
 tr_data <- train_select %>% group_by(pitch_type,stand,p_throws) %>% nest() %>% 
   full_join(tr) %>% 
   group_by(pitch_type,stand,p_throws) %>% 
   do(augment(.$fit[[1]], newdata = .$data[[1]])) 
-tr_data
+
 tr_data$prob <- exp(tr_data$.fitted)/(1+exp(tr_data$.fitted))
 
-te <-
-  test %>% group_by(pitch_type,stand,p_throws) %>% nest() %>% 
-  full_join(tr) %>% 
-  group_by(pitch_type,stand,p_throws) %>% 
-  do(augment(.$fit[[1]], newdata = .$data[[1]])) 
 
-te$prob <- exp(te$.fitted)/(1+exp(te$.fitted))
+# Comment out the test code
+# te <-
+#   test %>% group_by(pitch_type,stand,p_throws) %>% nest() %>% 
+#   full_join(tr) %>% 
+#   group_by(pitch_type,stand,p_throws) %>% 
+#   do(augment(.$fit[[1]], newdata = .$data[[1]])) 
+# 
+# te$prob <- exp(te$.fitted)/(1+exp(te$.fitted))
 
-summary(te)
+
 final <- tr_data %>% group_by(pitch_type,p_throws,stand,player_name) %>% 
   summarise(actual_whiff_rate=sum(whiff == "1")/n(),
     mph=mean(release_speed),rpm=mean(release_spin_rate),
@@ -85,5 +75,6 @@ final <- tr_data %>% group_by(pitch_type,p_throws,stand,player_name) %>%
 # final %>% group_by(pitch_type,p_throws,stand) %>% 
 # write_csv("exports/swing_miss_fb.csv")
 
+#fastball summary data
 fb <- final %>% group_by(pitch_type,p_throws,stand)
-
+#View(fb)
