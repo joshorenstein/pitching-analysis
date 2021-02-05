@@ -5,3 +5,4 @@
 4) This model will be updated to include command and batted ball data to create a more complete profile
 
 [Mets Pitching Staff](http://github.com/joshorenstein/pitching-analysis/blob/main/results/mets-1.pdf)
+[Pirates Pitching Staff](http://github.com/joshorenstein/pitching-analysis/blob/main/results/pirates.pdf)
