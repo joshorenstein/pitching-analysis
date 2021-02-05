@@ -48,7 +48,7 @@ m <- me %>%
 m[paste0("sugg", 1:4)] <- t(apply(m[-3], 1, FUN = function(x) names(sort(x))))
 m
 #clean up the results with some brute force code that i need to functionalize
-m %>% inner_join(me) %>% 
+final <- m %>% inner_join(me) %>% 
   dplyr::select(player_name,p_throws,stand,sugg1,sugg2,sugg3,sugg4,xFF,xSI,xFC,xSL,xCU,xCH) %>% 
   mutate(sugg4=if_else((sugg4=="FF" & is.na(xFF)==TRUE)|
                          (sugg4=="SI" & is.na(xSI)==TRUE)|
@@ -69,10 +69,16 @@ m %>% inner_join(me) %>%
                          (sugg2=="SL" & is.na(xSL)==TRUE)|
                          (sugg2=="CU" & is.na(xCU)==TRUE),'',sugg2))
 
-#grab the mets 
-mets <- m %>% filter(player_name %in% c("Jacob deGrom","Carlos Carrasco","Marcus Stroman","David Peterson",
-                             "Joey Lucchesi","Edwin Diaz","Jeurys Familia","Trevor May","Miguel Castro",
-                             "Dellin Betances","Robert Gsellman","Aaron Loup","Drew Smith","Brad Brach","Seth Lugo",
-                             "Jacob Barnes","Stephen Tarpley","Corey Oswalt","Trevor Bauer")) 
+#grab some player data
+pirates <- final %>% filter(player_name %in% c("Steven Breault","Chad Kuhl","Mitch Keller",
+                                        "JT Brubaker","Wil Crowe","Richard Rodriguez",
+                                        "Chris Stratton","Michael Feliz","Kyle Crick",
+                                        "Sam Howard","David Bednar","Carson Fulmer","Luis Oviedo")) 
+
+mets <- final %>% filter(player_name %in% c("Jacob deGrom","Carlos Carrasco","Marcus Stroman","David Peterson",
+                                        "Joey Lucchesi","Edwin Diaz","Jeurys Familia","Trevor May","Miguel Castro",
+                                        "Dellin Betances","Robert Gsellman","Aaron Loup","Drew Smith","Brad Brach","Seth Lugo",
+                                        "Jacob Barnes","Stephen Tarpley","Corey Oswalt","Trevor Bauer")) 
 #print to csv
 mets %>% write_csv('mets.csv')    
+pirates %>% write_csv('pirates.csv')
