@@ -75,6 +75,11 @@ pirates <- final %>% filter(player_name %in% c("Steven Brault","Chad Kuhl","Mitc
                                         "Chris Stratton","Michael Feliz","Kyle Crick",
                                         "Sam Howard","David Bednar","Carson Fulmer","Luis Oviedo")) 
 
+blue_jays <- final %>% filter(player_name %in% c("Hyun Jin Ryu","Robbie Ray","Nate Pearson","Tanner Roark",
+                                                 "Steven Matz","Kirby Yates","Jordan Romano","Rafael Dolis",
+                                                 "Julian Merryweather","Ryan Borucki","Ross Stripling",
+                                                 "Tyler Chatwood","Shun Yamaguchi"))
+
 mets <- final %>% filter(player_name %in% c("Jacob deGrom","Carlos Carrasco","Marcus Stroman","David Peterson",
                                         "Joey Lucchesi","Edwin Diaz","Jeurys Familia","Trevor May","Miguel Castro",
                                         "Dellin Betances","Robert Gsellman","Aaron Loup","Drew Smith","Brad Brach","Seth Lugo",
@@ -94,6 +99,7 @@ mariners <- final %>% filter(player_name %in% c("Marco Gonzales","Yusei Kikuchi"
                                                 "Erik Swanson"))
 
 
+View(blue_jays)
 View(redsox)
 View(mariners)
 #print to csv
@@ -101,3 +107,4 @@ mets %>% write_csv('data/mets.csv')
 pirates %>% write_csv('data/pirates.csv')
 redsox %>% write_csv('data/redsox.csv')
 mariners %>% write_csv('data/mariners.csv')
+blue_jays %>% write_csv('data/blue_jays.csv')

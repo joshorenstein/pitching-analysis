@@ -1,0 +1,27 @@
+player_name,p_throws,stand,sugg1,sugg2,sugg3,sugg4,xFF,xSI,xFC,xSL,xCU,xCH
+Hyun Jin Ryu,L,L,SI,FC,CH,CU,0.04,0.49,0.44,NA,0.06,0.12
+Hyun Jin Ryu,L,R,CH,SI,FF,FC,0.16,0.27,0.15,NA,0.11,0.64
+Jordan Romano,R,L,FF,SL,,,0.82,NA,NA,0.64,NA,NA
+Jordan Romano,R,R,FF,SL,,,0.93,NA,NA,0.64,NA,NA
+Julian Merryweather,R,L,FF,CH,,,0.73,NA,NA,NA,NA,0.55
+Julian Merryweather,R,R,CH,FF,SL,CU,0.88,NA,NA,0.87,0.34,0.98
+Kirby Yates,R,L,FF,CH,,,0.53,NA,NA,NA,NA,0.31
+Kirby Yates,R,R,CH,FF,,,0.26,NA,NA,NA,NA,0.91
+Nate Pearson,R,L,FF,CH,SL,CU,0.82,NA,NA,0.28,0.18,0.43
+Nate Pearson,R,R,FF,SL,,,0.96,NA,NA,0.64,NA,NA
+Rafael Dolis,R,L,CH,SI,,,NA,0.27,NA,NA,NA,0.64
+Rafael Dolis,R,R,CH,SL,SI,,NA,0.49,NA,0.87,NA,0.91
+Robbie Ray,L,L,SL,CU,FF,,0.4,NA,NA,0.87,0.86,NA
+Robbie Ray,L,R,CU,SL,FF,SI,0.73,0.69,NA,0.78,0.93,0.07
+Ross Stripling,R,L,CH,SL,CU,FF,0.04,NA,NA,0.16,0.11,0.82
+Ross Stripling,R,R,CH,SL,FF,CU,0.16,NA,NA,0.4,0.11,0.74
+Ryan Borucki,L,L,SL,SI,,,NA,0.27,NA,0.52,NA,NA
+Ryan Borucki,L,R,SL,CH,SI,,NA,0.11,NA,0.87,NA,0.64
+Shun Yamaguchi,R,L,FF,CH,SL,,0.4,NA,NA,0.02,NA,0.07
+Shun Yamaguchi,R,R,CH,SL,FF,,0.16,NA,NA,0.28,NA,0.55
+Steven Matz,L,L,CH,SI,CU,,NA,0.27,NA,NA,0.25,0.64
+Steven Matz,L,R,SI,CH,SL,CU,NA,0.83,NA,0.64,0.11,0.82
+Tanner Roark,R,L,SI,CU,CH,FF,0.16,0.27,NA,0.07,0.25,0.19
+Tanner Roark,R,R,SL,CH,FF,CU,0.4,0.11,NA,0.52,0.34,0.43
+Tyler Chatwood,R,L,CU,FC,FF,SI,0.53,0.49,0.7,NA,0.93,NA
+Tyler Chatwood,R,R,FC,SI,,,NA,0.49,0.61,NA,NA,NA
