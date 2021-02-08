@@ -7,3 +7,5 @@ Generalized Additive Model to model MLB pitcher stuff <br/>
 
 [Mets Pitching Staff](http://github.com/joshorenstein/pitching-analysis/blob/main/results/mets-1.pdf) <br/>
 [Pirates Pitching Staff](http://github.com/joshorenstein/pitching-analysis/blob/main/results/pirates.pdf) <br/>
+[Red Sox Pitching Staff](http://github.com/joshorenstein/pitching-analysis/blob/main/results/red-sox.pdf) <br/>
+[Mariners Pitching Staff](http://github.com/joshorenstein/pitching-analysis/blob/main/results/mariners.pdf) <br/>
