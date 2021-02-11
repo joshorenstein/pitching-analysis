@@ -6,8 +6,8 @@ library(VIF)
 library(car)
 library(broom)
 
-#s <- read_csv('raw_data.csv') #if you need to read the data in 
-sp <- s %>% filter(des2 %in% c("ball","strike")) #data for whiff model
+#s <- read_csv('scraps/raw_data.csv') #if you need to read the data in 
+sp <- s %>% dplyr::filter(des2 %in% c("ball","strike")) #data for whiff model
 
 df <- sp %>%   #data for fb whiff model %>% 
   #filter(pitch_type %in% c("FF","SI")) %>% 
@@ -20,7 +20,7 @@ df$whiff <- as.factor(df$whiff) #make the binary whiff variable a factor
 
 # Make sure that you get the same random numbers
 smp_size <- floor(1 * nrow(df)) #just going to use 2020 data as training and wait until '21 season for test data
-smp_size
+
 
 ## set the seed to make your partition reproducible
 set.seed(61919)

@@ -1,13 +1,15 @@
+sh <- s %>%  filter(events !='null')
+#View(sh)
 
-sp <- s %>% filter(des2 %in% c("ball","strike")) #data for whiff model
+sh <- sh %>% mutate(HR=if_else(events=="home_run",1,0))
 
-df <- sp %>%   #data for Curve/Slider/Cutter whiff model %>% 
+df <- sh %>%   #data for Curve/Slider/Cutter whiff model %>% 
   mutate(pitch_type=(if_else(pitch_type == "FS","CH",if_else(pitch_type=="KC","CU",pitch_type)))) %>% 
   filter(pitch_type %in% c("CU","SL","FC","CH"))
 
-df %>% group_by(pitch_type,whiff) %>% count()
+df %>% group_by(pitch_type,HR) %>% count()
 
-df$whiff <- as.factor(df$whiff)
+#df$whiff <- as.factor(df$whiff)
 
 # Make sure that you get the same random numbers
 smp_size <- floor(1 * nrow(df))
@@ -22,9 +24,9 @@ nrow(train)/nrow(df)
 names(train)
 #Grab data for breaking ball model
 train_select <- train %>% dplyr::select(player_name,pitch_type,p_throws,stand,
-                          release_speed,release_pos_x,release_pos_z,release_spin_rate,
-                          release_spin_direction,pfx_x,pfx_z,hmov_diff,velo_diff,whiff,
-                          plate_x,plate_z) 
+                                        release_speed,release_pos_x,release_pos_z,release_spin_rate,
+                                        release_spin_direction,pfx_x,pfx_z,hmov_diff,velo_diff,HR,
+                                        plate_x,plate_z) 
 
 train_select %>% 
   group_by(pitch_type,p_throws,stand) %>% 
@@ -33,7 +35,7 @@ train_select %>%
 #GAM model for breaking balls
 tr <-  train_select %>%
   group_by(pitch_type,p_throws,stand) %>%
-  do(fit = gam(whiff ~ release_speed+release_pos_x+release_pos_z+release_spin_rate
+  do(fit = gam(HR ~ release_speed+release_pos_x+release_pos_z+release_spin_rate
                +release_spin_direction+pfx_x+pfx_z+hmov_diff+velo_diff+plate_x+plate_z, data = .,family=binomial))
 
 tr_data <- train_select %>% group_by(pitch_type,stand,p_throws) %>% nest() %>% 
@@ -53,15 +55,17 @@ tr_data$prob <- exp(tr_data$.fitted)/(1+exp(tr_data$.fitted))
 #te$prob <- exp(te$.fitted)/(1+exp(te$.fitted))
 
 #te$whiff <- as.numeric(te$whiff) #Check whiff calculation
-
+#View(tr_data)
 final <- tr_data %>% group_by(pitch_type,p_throws,stand,player_name) %>% 
-  summarise(actual_whiff_rate=sum(whiff == "1")/n(),mph=mean(release_speed),rpm=mean(release_spin_rate),
+  summarise(actual_hr_rate=sum(HR == "1")/n(),
+            mph=mean(release_speed),rpm=mean(release_spin_rate),
             axis=mean(release_spin_direction),
             pfx_x=mean(pfx_x),
             pfx_z=mean(pfx_z),
-            prob=round(mean(prob),2),n=n()) %>% arrange(p_throws,stand) %>% rename(exp_whiff_rate=prob) %>% 
+            prob=round(mean(prob),2),n=n()) %>% arrange(p_throws,stand) %>% 
   filter(n>10) %>% 
-  arrange(desc(exp_whiff_rate)) 
+  arrange(desc(prob)) %>% rename(exp_hr_rate = prob) 
+
 
 # 
 # final %>% group_by(pitch_type,p_throws,stand) %>%
@@ -70,41 +74,53 @@ final <- tr_data %>% group_by(pitch_type,p_throws,stand,player_name) %>%
 #Summarized breaking ball model
 br <- final %>% group_by(pitch_type,p_throws,stand) 
 #$View(br)
+#Bind all the data
 
-br_totals <- tr_data %>% group_by(player_name,pitch_type) %>% 
-  summarise(actual_whiff_rate=sum(whiff == "1")/n(),
+
+br_hr_totals <- tr_data %>% group_by(player_name,pitch_type) %>% 
+  summarise(actual_HR_rate=sum(HR == "1")/n(),
             mph=mean(release_speed),rpm=mean(release_spin_rate),
             axis=mean(release_spin_direction),
             pfx_x=mean(pfx_x),
             pfx_z=mean(pfx_z),
             prob=round(mean(prob),2),n=n()) %>% 
-  arrange(desc(prob)) %>% rename(exp_whiff_rate = prob) %>% 
-  dplyr::select(player_name,pitch_type,exp_whiff_rate,n) %>% 
+  arrange(desc(prob)) %>% rename(exp_HR_rate = prob) %>% 
+  dplyr::select(player_name,pitch_type,exp_HR_rate,n) %>% 
   arrange(player_name) %>% 
   pivot_wider(id_cols = player_name, 
               names_from = pitch_type, 
-              values_from = c("exp_whiff_rate", "n"))
+              values_from = c("exp_HR_rate", "n"))
 
-br_totals
-br_totals[is.na(br_totals)] <- 0
-
-#Bind all the data
+br_hr_totals[is.na(br_hr_totals)] <- 0
+br_hr_totals
 full_df <- bind_rows(fb,br)
-totals_df <- fb_totals %>% 
-  left_join(br_totals)
 
+totals_hr_df <- fb_hr_totals %>% 
+  left_join(br_hr_totals)
 
-whiffs <- totals_df %>% 
-  mutate(whiff_product=n_FF*exp_whiff_rate_FF+
-                        n_SI*exp_whiff_rate_SI+
-                        n_SL*exp_whiff_rate_SL+
-                        n_CH*exp_whiff_rate_CH+
-                        n_FC*exp_whiff_rate_FC+
-                        n_CU*exp_whiff_rate_CU,
-        n=n_FF+n_SI+n_SL+n_CH+n_FC+n_CU,
-        exp_whiff_rate=whiff_product/n) %>% 
-  arrange(desc(exp_whiff_rate)) %>% 
-  dplyr::select(player_name,exp_whiff_rate,n,
-                exp_whiff_rate_FF,exp_whiff_rate_SI,exp_whiff_rate_SL,
-                exp_whiff_rate_CH,exp_whiff_rate_CU,exp_whiff_rate_FC,
-                n_FF,n_SI,n_SL,n_CH,n_CU,n_FC)
+HRs <- totals_hr_df %>% 
+  mutate(HR_product=n_FF*exp_HR_rate_FF+
+           n_SI*exp_HR_rate_SI+
+           n_SL*exp_HR_rate_SL+
+           n_CH*exp_HR_rate_CH+
+           n_FC*exp_HR_rate_FC+
+           n_CU*exp_HR_rate_CU,
+         n1=n_FF+n_SI+n_SL+n_CH+n_FC+n_CU,
+         exp_HR_rate=HR_product/n1) %>% 
+  arrange(desc(exp_HR_rate)) %>% 
+  dplyr::select(player_name,exp_HR_rate,n1,
+                exp_HR_rate_FF,exp_HR_rate_SI,exp_HR_rate_SL,
+                exp_HR_rate_CH,exp_HR_rate_CU,exp_HR_rate_FC,
+                n_FF,n_SI,n_SL,n_CH,n_CU,n_FC) %>% 
+  rename(n_FF1=n_FF,n_SI1=n_SI,n_SL1=n_SL,n_CH1=n_CH,n_CU1=n_CU,n_FC1=n_FC)
+
+names(HRs)
+df_final <- pitch_update %>% left_join(HRs)
+
+df_final %>% write_csv("results/pitch_level_results.csv")
+df_m <- 
+  df_final %>% 
+  rename(PA=n1) %>% 
+  dplyr::select(player_name,exp_whiff_rate,f_p_str,exp_HR_rate,PA) %>% 
+  rename(whiff_rate=exp_whiff_rate,f_strike=f_p_str,HR_PCT=exp_HR_rate)
+

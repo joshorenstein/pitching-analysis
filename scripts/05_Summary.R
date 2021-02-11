@@ -1,5 +1,4 @@
-head(full_df)
-names(full_df)
+
 #View(full_df)
 
 #just keep rows that have 10 or more pitches
@@ -99,9 +98,7 @@ mariners <- final %>% filter(player_name %in% c("Marco Gonzales","Yusei Kikuchi"
                                                 "Erik Swanson"))
 
 
-View(blue_jays)
-View(redsox)
-View(mariners)
+
 #print to csv
 mets %>% write_csv('data/mets.csv')    
 pirates %>% write_csv('data/pirates.csv')
