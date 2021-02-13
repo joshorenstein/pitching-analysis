@@ -115,12 +115,13 @@ HRs <- totals_hr_df %>%
   rename(n_FF1=n_FF,n_SI1=n_SI,n_SL1=n_SL,n_CH1=n_CH,n_CU1=n_CU,n_FC1=n_FC)
 
 names(HRs)
-df_final <- pitch_update %>% left_join(HRs)
-
+df_final <- pitch_update_2 %>% left_join(HRs)
+View(df_final)
 df_final %>% write_csv("results/pitch_level_results.csv")
+names(df_final)
 df_m <- 
   df_final %>% 
   rename(PA=n1) %>% 
-  dplyr::select(player_name,exp_whiff_rate,f_p_str,exp_HR_rate,PA) %>% 
+  dplyr::select(player_name,exp_whiff_rate,f_p_str,exp_swing_rate,exp_HR_rate,PA) %>% 
   rename(whiff_rate=exp_whiff_rate,f_strike=f_p_str,HR_PCT=exp_HR_rate)
 

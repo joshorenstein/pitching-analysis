@@ -6,7 +6,7 @@ library(VIF)
 library(car)
 library(broom)
 
-#s <- read_csv('scraps/raw_data.csv') #if you need to read the data in 
+s <- read_csv('scraps/raw_data.csv') #if you need to read the data in 
 sp <- s %>% dplyr::filter(des2 %in% c("ball","strike")) #data for whiff model
 
 df <- sp %>%   #data for fb whiff model %>% 

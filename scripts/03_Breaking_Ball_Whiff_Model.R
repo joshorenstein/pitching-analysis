@@ -1,6 +1,4 @@
 
-sp <- s %>% filter(des2 %in% c("ball","strike")) #data for whiff model
-
 df <- sp %>%   #data for Curve/Slider/Cutter whiff model %>% 
   mutate(pitch_type=(if_else(pitch_type == "FS","CH",if_else(pitch_type=="KC","CU",pitch_type)))) %>% 
   filter(pitch_type %in% c("CU","SL","FC","CH"))

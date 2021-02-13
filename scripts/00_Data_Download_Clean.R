@@ -347,11 +347,10 @@ s <- season_mlb5 %>%
   dplyr::select(player_name,pitch_type,game_date,release_speed,release_pos_x,balls,strikes,events,description,
          release_pos_y,release_pos_z,batter,pitcher,stand,p_throws,release_spin_rate,release_extension,release_spin_direction,lin_weight,
          velo_diff,hmov_diff,vmov_diff,spin_dir_diff,pfx_x,pfx_z,plate_x,plate_z,spin_dir_adj,est_woba,estimated_ba_using_speedangle,
+         description,
          estimated_woba_using_speedangle,launch_speed,launch_angle,barrel,des2) %>% 
-  mutate(whiff=(if_else(description %in% c("swinging_strike_blocked","swinging_strike","missed_bunt"),1,0)))
+  mutate(whiff=(if_else(description %in% c("swinging_strike_blocked","swinging_strike","missed_bunt"),1,0))) %>% 
+  mutate(swing=(if_else(description %in% c("ball","blocked_ball","pitchout"),1,0)))
 
-
-s %>% write_csv('scraps/raw_data.csv') #if you want to save the data uncomment this
-
-
+#s %>% write_csv('scraps/raw_data.csv') #if you want to save the data uncomment this
 
