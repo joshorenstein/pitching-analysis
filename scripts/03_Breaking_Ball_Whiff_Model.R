@@ -32,7 +32,8 @@ train_select %>%
 tr <-  train_select %>%
   group_by(pitch_type,p_throws,stand) %>%
   do(fit = gam(whiff ~ release_speed+release_pos_x+release_pos_z+release_spin_rate
-               +release_spin_direction+pfx_x+pfx_z+hmov_diff+velo_diff+plate_x+plate_z, data = .,family=binomial))
+               +release_spin_direction+pfx_x+pfx_z+hmov_diff+velo_diff+plate_x+plate_z, data = .,family=binomial,
+               method="REML",bs="re"))
 
 tr_data <- train_select %>% group_by(pitch_type,stand,p_throws) %>% nest() %>% 
   full_join(tr) %>% 

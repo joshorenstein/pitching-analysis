@@ -111,4 +111,4 @@ head(f_p)
 head(whiffs)
 #View(fb_totals)
 pitch_update <- whiffs %>% left_join(f_p) %>% left_join(fb_totals,by=c("player_name"="player_name"))
-
+View(pitch_update)

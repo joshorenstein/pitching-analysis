@@ -5,9 +5,12 @@ library(MASS)
 library(VIF)
 library(car)
 library(broom)
-
-s <- read_csv('scraps/raw_data.csv') #if you need to read the data in 
-sp <- s %>% dplyr::filter(des2 %in% c("ball","strike")) #data for whiff model
+head(s)
+s %>% distinct(description)
+#s <- read_csv('scraps/raw_data.csv') #if you need to read the data in 
+sp <- s %>% dplyr::filter(description %in% c("called_strike","swinging_strike",
+                                             "swinging_strike_blocked","foul_tip",
+                                             "foul","foul_bunt")) #data for whiff model
 
 df <- sp %>%   #data for fb whiff model %>% 
   #filter(pitch_type %in% c("FF","SI")) %>% 

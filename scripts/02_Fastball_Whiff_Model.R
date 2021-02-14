@@ -39,7 +39,7 @@ tr <-  train_select %>%
   filter(pitch_type %in% c("FF","SI")) %>% 
   group_by(pitch_type,p_throws,stand) %>%
   do(fit = gam(whiff ~ release_speed+release_pos_x+release_pos_z+
-                 release_spin_rate+release_spin_direction+pfx_x+pfx_z+plate_x+plate_z, data = .,family=binomial))
+                 release_spin_rate+release_spin_direction+pfx_x+pfx_z+plate_x+plate_z, data = .,family=binomial,method="REML",bs="re"))
 
 
 
@@ -93,3 +93,4 @@ fb_totals <- tr_data %>% group_by(player_name,pitch_type) %>%
 
 fb_totals[is.na(fb_totals)] <- 0
 
+View(fb_totals)

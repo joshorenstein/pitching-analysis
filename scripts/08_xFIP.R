@@ -1,7 +1,7 @@
 library(baseballr)
-
+View(df_model)
 df_model <- df_m %>% filter(PA>50)
-df_model <- df_model %>% rename(swing_pct=exp_swing_rate)
+#df_model <- df_model %>% rename(swing_pct=exp_swing_rate)
 pitchers <- daily_pitcher_bref("2019-04-01", "2019-10-03") %>% 
   fip_plus() %>% 
   #dplyr::select(season, Name, IP, ERA, SO, uBB, HBP, HR, FIP, wOBA_against, wOBA_CON_against) %>%
@@ -44,11 +44,11 @@ sd_target_4 <- sd(f$swing_pct)
 df_model$whiff_rate <- mean_target + (df_model$whiff_rate - mean(df_model$whiff_rate)) * sd_target/sd(df_model$whiff_rate) #according to the given formula following the link you provided
 df_model$f_strike <- mean_target_1 + (df_model$f_strike - mean(df_model$f_strike)) * sd_target_1/sd(df_model$f_strike) #according to the given formula following the link you provided
 df_model$HR_PCT <- mean_target_2 + (df_model$HR_PCT - mean(df_model$HR_PCT)) * sd_target_2/sd(df_model$HR_PCT) #according to the given formula following the link you provided
-df_model$swing_pct <- mean_target_4 + (df_model$swing_pct - mean(df_model$swing_pct)) * sd_target_4/sd(df_model$swing_pct) #according to the given formula following the link you provided
+#df_model$swing_pct <- mean_target_4 + (df_model$swing_pct - mean(df_model$swing_pct)) * sd_target_4/sd(df_model$swing_pct) #according to the given formula following the link you provided
 df_model$whiff_rate <- as.numeric(df_model$whiff_rate)
 df_model$f_strike <- as.numeric(df_model$f_strike)
 df_model$HR_PCT <- as.numeric(df_model$HR_PCT)
-df_model$swing_pct <- as.numeric(df_model$swing_pct)
+#df_model$swing_pct <- as.numeric(df_model$swing_pct)
 summary(m3)
 head(df_model)
 summary(df_model)
@@ -80,11 +80,12 @@ results <- final %>%
          exp_homerun_pct=round(HR_PCT*100,1),uBB_perc=round(uBB_perc*100,1)) %>% 
   dplyr::select(player_name,FIP_based_on_stuff,Predicted_FIP,exp_whiff_pct,exp_homerun_pct,uBB_perc,PA) %>% 
   arrange(FIP_based_on_stuff)
-View(results)
+#View(results)
 results %>% write_csv("results/results.csv")
 p <- 
-  results %>% filter(PA>=250)
-View(p)
-q <- ggplot(p, aes(y = reorder(player_name, -pred_FIP), x = pred_FIP)) + geom_bar(stat = "identity",fill="gray")
+  results %>% filter(PA>=150& FIP_based_on_stuff<=3.5)
+#View(p)
+q <- ggplot(p, aes(y = reorder(player_name, -FIP_based_on_stuff), x = FIP_based_on_stuff)) + 
+  geom_bar(stat = "identity",fill="gray")
 q + labs(x="predicted FIP based on stuff",y="pitcher")
 ggsave("results/predicted-fip.pdf", width = 6, height = 4)
