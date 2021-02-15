@@ -1,8 +1,10 @@
-
-#View(full_df)
+whiffs_data %>% arrange(player_name) %>% View()
+h <- hr_data %>% select(pitch_type,p_throws,stand,player_name,actual_hr_rate,exp_hr_rate)
+names(h)
+final <- whiffs_data %>% left_join(h)
 
 #just keep rows that have 10 or more pitches
-exp_whiff_rate <- full_df %>%
+exp_whiff_rate <- final %>%
   dplyr::filter(n>=10) %>% 
   dplyr::select(player_name,p_throws,stand,pitch_type,exp_whiff_rate) %>% 
   group_by(pitch_type) %>% 
@@ -13,7 +15,7 @@ exp_whiff_rate <- full_df %>%
 
 
 #join to actual whiff data and do a comparison of actual vs expected whiffs
-actual_whiff_rate <- full_df %>%
+actual_whiff_rate <- final %>%
   filter(n>=10) %>% 
   dplyr::select(player_name,p_throws,stand,pitch_type,actual_whiff_rate) %>% 
   group_by(pitch_type) %>% 
@@ -96,6 +98,7 @@ mariners <- final %>% filter(player_name %in% c("Marco Gonzales","Yusei Kikuchi"
                                                 "Anthony Misiewicz","Casey Sadler",
                                                 "Keynan Middleton","Will Vest",
                                                 "Erik Swanson"))
+
 
 
 

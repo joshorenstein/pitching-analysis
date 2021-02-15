@@ -3,7 +3,7 @@ library(psych)
 library(mgcv)
 library(Hmisc)
 sh <- s %>% filter(events !='null')
-#View(sh)
+
 
 sh <- sh %>% mutate(HR=if_else(events=="home_run",1,0))
 sh %>% group_by(HR) %>% summarise(n=n())
@@ -67,16 +67,6 @@ tr_data$prob <- exp(tr_data$.fitted)/(1+exp(tr_data$.fitted))
 # te$prob <- exp(te$.fitted)/(1+exp(te$.fitted))
 
 
-final <- tr_data %>% group_by(pitch_type,p_throws,stand,player_name) %>% 
-  summarise(actual_hr_rate=sum(HR == "1")/n(),
-            mph=mean(release_speed),rpm=mean(release_spin_rate),
-            axis=mean(release_spin_direction),
-            pfx_x=mean(pfx_x),
-            pfx_z=mean(pfx_z),
-            prob=round(mean(prob),2),n=n()) %>% arrange(p_throws,stand) %>% 
-  #filter(n>10) %>% 
-  arrange(desc(prob)) %>% rename(exp_hr_rate = prob) 
-
 # final %>% group_by(pitch_type,p_throws,stand) %>% 
 # write_csv("exports/swing_miss_fb.csv")
 
@@ -98,4 +88,16 @@ fb_hr_totals <- tr_data %>% group_by(player_name,pitch_type) %>%
               values_from = c("exp_HR_rate", "n"))
 
 fb_hr_totals[is.na(fb_hr_totals)] <- 0
-fb_hr_totals
+
+
+
+final <- tr_data %>% group_by(pitch_type,p_throws,stand,player_name) %>%
+  summarise(actual_hr_rate=sum(HR == "1")/n(),
+            mph=mean(release_speed),rpm=mean(release_spin_rate),
+            axis=mean(release_spin_direction),
+            pfx_x=mean(pfx_x),
+            pfx_z=mean(pfx_z),
+            prob=round(mean(prob),2),n=n()) %>% arrange(p_throws,stand) %>%
+  filter(n>10) %>%
+  arrange(desc(prob)) %>% rename(exp_hr_rate = prob)
+

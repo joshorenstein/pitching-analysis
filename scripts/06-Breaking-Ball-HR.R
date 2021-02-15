@@ -26,7 +26,7 @@ names(train)
 train_select <- train %>% dplyr::select(player_name,pitch_type,p_throws,stand,
                                         release_speed,release_pos_x,release_pos_z,release_spin_rate,
                                         release_spin_direction,pfx_x,pfx_z,hmov_diff,velo_diff,HR,
-                                        plate_x,plate_z) 
+                                        plate_x,plate_z,vmov_diff,spin_dir_diff) 
 
 train_select %>% 
   group_by(pitch_type,p_throws,stand) %>% 
@@ -34,16 +34,30 @@ train_select %>%
 
 #GAM model for breaking balls
 tr <-  train_select %>%
+  filter(pitch_type!="CH") %>% 
   group_by(pitch_type,p_throws,stand) %>%
   do(fit = gam(HR ~ release_speed+release_pos_x+release_pos_z+release_spin_rate
                +release_spin_direction+pfx_x+pfx_z+hmov_diff+velo_diff+plate_x+plate_z, data = .,family=binomial))
+
+tr_ch <-  train_select %>%
+  filter(pitch_type == "CH") %>% 
+  group_by(pitch_type,p_throws,stand) %>%
+  do(fit = gam(HR ~ release_speed+release_pos_x+release_pos_z+release_spin_rate+release_spin_direction+pfx_x+pfx_z
+               +hmov_diff+vmov_diff+velo_diff+spin_dir_diff+plate_x+plate_z, data = .,family=binomial,
+               method="REML",bs="re"))
 
 tr_data <- train_select %>% group_by(pitch_type,stand,p_throws) %>% nest() %>% 
   full_join(tr) %>% 
   group_by(pitch_type,stand,p_throws) %>% 
   do(augment(.$fit[[1]], newdata = .$data[[1]])) 
 
+tr_data_ch <- train_select %>% group_by(pitch_type,stand,p_throws) %>% nest() %>% 
+  full_join(tr_ch) %>% 
+  group_by(pitch_type,stand,p_throws) %>% 
+  do(augment(.$fit[[1]], newdata = .$data[[1]])) 
+
 tr_data$prob <- exp(tr_data$.fitted)/(1+exp(tr_data$.fitted))
+tr_data_ch$prob <- exp(tr_data_ch$.fitted)/(1+exp(tr_data_ch$.fitted))
 
 # Comment out the test data
 # te <-
@@ -56,20 +70,12 @@ tr_data$prob <- exp(tr_data$.fitted)/(1+exp(tr_data$.fitted))
 
 #te$whiff <- as.numeric(te$whiff) #Check whiff calculation
 #View(tr_data)
-final <- tr_data %>% group_by(pitch_type,p_throws,stand,player_name) %>% 
-  summarise(actual_hr_rate=sum(HR == "1")/n(),
-            mph=mean(release_speed),rpm=mean(release_spin_rate),
-            axis=mean(release_spin_direction),
-            pfx_x=mean(pfx_x),
-            pfx_z=mean(pfx_z),
-            prob=round(mean(prob),2),n=n()) %>% arrange(p_throws,stand) %>% 
-  filter(n>10) %>% 
-  arrange(desc(prob)) %>% rename(exp_hr_rate = prob) 
-
 
 # 
 # final %>% group_by(pitch_type,p_throws,stand) %>%
 #   write_csv("exports/swing_miss_br.csv")
+
+t <- tr_data %>% bind_rows(tr_data_ch)
 
 #Summarized breaking ball model
 br <- final %>% group_by(pitch_type,p_throws,stand) 
@@ -77,7 +83,7 @@ br <- final %>% group_by(pitch_type,p_throws,stand)
 #Bind all the data
 
 
-br_hr_totals <- tr_data %>% group_by(player_name,pitch_type) %>% 
+br_hr_totals <- t  %>% group_by(player_name,pitch_type) %>% 
   summarise(actual_HR_rate=sum(HR == "1")/n(),
             mph=mean(release_speed),rpm=mean(release_spin_rate),
             axis=mean(release_spin_direction),
@@ -93,7 +99,7 @@ br_hr_totals <- tr_data %>% group_by(player_name,pitch_type) %>%
 
 br_hr_totals[is.na(br_hr_totals)] <- 0
 br_hr_totals
-full_df <- bind_rows(fb,br)
+
 
 totals_hr_df <- fb_hr_totals %>% 
   left_join(br_hr_totals)
@@ -114,14 +120,25 @@ HRs <- totals_hr_df %>%
                 n_FF,n_SI,n_SL,n_CH,n_CU,n_FC) %>% 
   rename(n_FF1=n_FF,n_SI1=n_SI,n_SL1=n_SL,n_CH1=n_CH,n_CU1=n_CU,n_FC1=n_FC)
 
-names(HRs)
-df_final <- pitch_update_2 %>% left_join(HRs)
-View(df_final)
+
+df_final <- pitch_update %>% left_join(HRs)
 df_final %>% write_csv("results/pitch_level_results.csv")
-names(df_final)
+
 df_m <- 
   df_final %>% 
   rename(PA=n1) %>% 
-  dplyr::select(player_name,exp_whiff_rate,f_p_str,exp_swing_rate,exp_HR_rate,PA) %>% 
+  dplyr::select(player_name,exp_whiff_rate,f_p_str,exp_HR_rate,PA) %>% 
   rename(whiff_rate=exp_whiff_rate,f_strike=f_p_str,HR_PCT=exp_HR_rate)
+
+final_br <- t %>% group_by(pitch_type,p_throws,stand,player_name) %>% 
+  summarise(actual_hr_rate=sum(HR == "1")/n(),
+            mph=mean(release_speed),rpm=mean(release_spin_rate),
+            axis=mean(release_spin_direction),
+            pfx_x=mean(pfx_x),
+            pfx_z=mean(pfx_z),
+            prob=round(mean(prob),2),n=n()) %>% arrange(p_throws,stand) %>%
+  filter(n>10) %>%
+  arrange(desc(prob)) %>% rename(exp_hr_rate = prob)
+
+hr_data <- final %>% bind_rows(final_br)
 

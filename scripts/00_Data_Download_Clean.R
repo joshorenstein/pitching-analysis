@@ -22,7 +22,6 @@ library(ggplot2)
 library(lubridate)
 library(here)
 
-
 set.seed(5818)
 
 # Data Acquisition from BaseballSavant.com -------------------------------
