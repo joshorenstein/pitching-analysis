@@ -1,10 +1,106 @@
-whiffs_data %>% arrange(player_name) %>% View()
+
 h <- hr_data %>% select(pitch_type,p_throws,stand,player_name,actual_hr_rate,exp_hr_rate)
-names(h)
-final <- whiffs_data %>% left_join(h)
+
+#View(final)
+final <- whiffs_data %>% 
+  left_join(h) %>% 
+  rename(whiff_rate=exp_whiff_rate) %>% 
+  rename(HR_PCT=exp_hr_rate)
+final <- as.data.frame(final)
+final[is.na(final)] <- 0 
+#View(final)
+final$HR_PCT <- scale(final$HR_PCT, center = TRUE, scale = TRUE)
+final$whiff_rate <- scale(final$whiff_rate, center=TRUE,scale=TRUE)
+
+#class(final$HR_PCT)
+# mean_target_2
+# sd_target_2
+final$whiff_rate <- mean_target + (final$whiff_rate - mean(final$whiff_rate)) * sd_target/sd(final$whiff_rate) 
+#final$f_strike <- mean_target_1 + (final$f_strike - mean(final$f_strike)) * sd_target_1/sd(final$f_strike) 
+final$HR_PCT <- mean_target_2 + (final$HR_PCT - mean(final$HR_PCT)) * sd_target_2/sd(final$HR_PCT)
+final$whiff_rate <- as.numeric(final$whiff_rate)
+final$HR_PCT <- as.numeric(final$HR_PCT)
+
+#View(final)
+q <- final %>% 
+  ungroup() %>% 
+  select(pitch_type,player_name,p_throws,stand,whiff_rate,HR_PCT,n) %>% 
+  arrange(player_name,pitch_type) 
+head(q)
+n <- q %>% 
+  group_by(pitch_type,player_name,p_throws) %>% 
+  summarise(n=sum(n)) %>% 
+  arrange(player_name)
+names(q)
+whiff_u <- q %>% 
+  group_by(pitch_type,player_name,stand) %>% 
+  mutate(whiffs=whiff_rate*n) %>%
+  select(-c(whiff_rate,HR_PCT,n)) %>% 
+  spread(stand,whiffs) %>% 
+  arrange(player_name)  %>% 
+  replace_na(replace = list(L = 0)) %>% 
+  replace_na(replace=list(R=0)) %>% 
+  mutate(whiffs=L+R) %>% 
+  select(-c(L,R)) %>% 
+  inner_join(n) %>% 
+  mutate(whiff_rate=whiffs/n) %>% 
+  select(-c(whiffs))
+names(whiff_u)
+HR_u <- q %>% 
+  group_by(pitch_type,player_name,stand) %>% 
+  mutate(HR=HR_PCT*n) %>%
+  select(-c(HR_PCT,whiff_rate,n)) %>% 
+  spread(stand,HR) %>% 
+  arrange(player_name)  %>% 
+  replace_na(replace = list(L = 0)) %>% 
+  replace_na(replace=list(R=0)) %>% 
+  mutate(HR=L+R) %>% 
+  select(-c(L,R)) %>% 
+  inner_join(n) %>% 
+  mutate(HR_PCT=HR/n) %>% 
+  select(-c(HR,n))
+head(whiff_u)
+head(HR_u)
+fin <- whiff_u %>% inner_join(HR_u)
+#View(HR_u)
+head(final)
+final %>% distinct(player_name)
+f <- final %>% 
+  filter(n>50) %>% 
+  add_predictions(m1) %>% 
+  rename(SO_perc=pred) %>% 
+  add_predictions(m2) %>% 
+  rename(pred_fip=pred) %>% 
+  mutate(pred_fip=pred_fip*-1)
+
+f1 <- fin %>%
+  filter(n>50) %>% 
+  add_predictions(m1) %>% 
+  rename(SO_perc=pred) %>% 
+  add_predictions(m2) %>% 
+  rename(pred_fip=pred) %>% 
+  mutate(pred_fip=pred_fip*-1)
+
+totals <- 
+f %>% 
+  select(pitch_type,p_throws,stand,player_name,pred_fip) %>% 
+  group_by(pitch_type) %>% 
+  spread(pitch_type,pred_fip) %>% 
+  mutate_if(is.numeric,percent_rank) %>% 
+  write_csv("results/best-pitches-by-batter-side.csv")
+
+totals_1 <- 
+  f1 %>% 
+  select(pitch_type,p_throws,player_name,pred_fip) %>% 
+  group_by(pitch_type) %>% 
+  spread(pitch_type,pred_fip) %>% 
+  mutate_if(is.numeric,percent_rank) %>% 
+  write_csv("results/best-pitches-overall.csv")
+
+
 
 #just keep rows that have 10 or more pitches
-exp_whiff_rate <- final %>%
+exp_whiff_rate <- whiffs_data %>%
   dplyr::filter(n>=10) %>% 
   dplyr::select(player_name,p_throws,stand,pitch_type,exp_whiff_rate) %>% 
   group_by(pitch_type) %>% 
@@ -15,7 +111,7 @@ exp_whiff_rate <- final %>%
 
 
 #join to actual whiff data and do a comparison of actual vs expected whiffs
-actual_whiff_rate <- final %>%
+actual_whiff_rate <- whiffs_data %>%
   filter(n>=10) %>% 
   dplyr::select(player_name,p_throws,stand,pitch_type,actual_whiff_rate) %>% 
   group_by(pitch_type) %>% 

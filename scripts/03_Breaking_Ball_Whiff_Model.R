@@ -119,6 +119,6 @@ final <- t %>% group_by(pitch_type,p_throws,stand,player_name) %>%
 br <- final %>% group_by(pitch_type,p_throws,stand) 
 #bind it with fastball data
 whiffs_data <- bind_rows(fb,br)
-
+#View(whiffs_data)
 
 

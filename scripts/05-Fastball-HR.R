@@ -71,7 +71,7 @@ tr_data$prob <- exp(tr_data$.fitted)/(1+exp(tr_data$.fitted))
 # write_csv("exports/swing_miss_fb.csv")
 
 #fastball summary data
-fb <- final %>% group_by(pitch_type,p_throws,stand)
+#fb <- final %>% group_by(pitch_type,p_throws,stand)
 
 fb_hr_totals <- tr_data %>% group_by(player_name,pitch_type) %>% 
   summarise(actual_HR_rate=sum(HR == "1")/n(),
@@ -98,6 +98,5 @@ final <- tr_data %>% group_by(pitch_type,p_throws,stand,player_name) %>%
             pfx_x=mean(pfx_x),
             pfx_z=mean(pfx_z),
             prob=round(mean(prob),2),n=n()) %>% arrange(p_throws,stand) %>%
-  filter(n>10) %>%
   arrange(desc(prob)) %>% rename(exp_hr_rate = prob)
 

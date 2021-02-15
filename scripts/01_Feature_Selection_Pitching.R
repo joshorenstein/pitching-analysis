@@ -8,10 +8,7 @@ library(broom)
 
 s %>% distinct(description)
 #s <- read_csv('scraps/raw_data.csv') #if you need to read the data in 
-sp <- s %>% filter(description %in% c("hit_into_play","hit_into_play_no_out",
-                                      "swinging_strike","hit_into_play_score",
-                                       "swinging_strike_blocked","foul_tip",
-                                      "foul")) #data types for whiff model
+sp <- s 
 
 df <- sp %>%   #data for fb whiff model %>% 
   mutate(sd_i=abs(release_pos_x*pfx_x), #create interaction variable for release side/horz break

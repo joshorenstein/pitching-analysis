@@ -2,7 +2,7 @@ library(tidyverse)
 library(psych)
 library(mgcv)
 options(warn=-1)
-
+sp <- s
 df <- sp %>%   #data for fb whiff model %>% 
   filter(pitch_type %in% c("FF","SI")) %>% 
   mutate(sd_i=abs(release_pos_x*pfx_x),

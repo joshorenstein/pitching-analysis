@@ -78,7 +78,7 @@ tr_data_ch$prob <- exp(tr_data_ch$.fitted)/(1+exp(tr_data_ch$.fitted))
 t <- tr_data %>% bind_rows(tr_data_ch)
 
 #Summarized breaking ball model
-br <- final %>% group_by(pitch_type,p_throws,stand) 
+#br <- final %>% group_by(pitch_type,p_throws,stand) 
 #$View(br)
 #Bind all the data
 
@@ -137,7 +137,6 @@ final_br <- t %>% group_by(pitch_type,p_throws,stand,player_name) %>%
             pfx_x=mean(pfx_x),
             pfx_z=mean(pfx_z),
             prob=round(mean(prob),2),n=n()) %>% arrange(p_throws,stand) %>%
-  filter(n>10) %>%
   arrange(desc(prob)) %>% rename(exp_hr_rate = prob)
 
 hr_data <- final %>% bind_rows(final_br)
