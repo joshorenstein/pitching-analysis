@@ -5,7 +5,8 @@ h <- hr_data %>% select(pitch_type,p_throws,stand,player_name,actual_hr_rate,exp
 final <- whiffs_data %>% 
   left_join(h) %>% 
   rename(whiff_rate=exp_whiff_rate) %>% 
-  rename(HR_PCT=exp_hr_rate)
+  rename(HR_PCT=exp_hr_rate) %>% 
+  filter(n>50)
 final <- as.data.frame(final)
 final[is.na(final)] <- 0 
 #View(final)
@@ -20,8 +21,8 @@ final$whiff_rate <- mean_target + (final$whiff_rate - mean(final$whiff_rate)) * 
 final$HR_PCT <- mean_target_2 + (final$HR_PCT - mean(final$HR_PCT)) * sd_target_2/sd(final$HR_PCT)
 final$whiff_rate <- as.numeric(final$whiff_rate)
 final$HR_PCT <- as.numeric(final$HR_PCT)
-
-#View(final)
+head(final)
+View(final)
 q <- final %>% 
   ungroup() %>% 
   select(pitch_type,player_name,p_throws,stand,whiff_rate,HR_PCT,n) %>% 
@@ -66,15 +67,15 @@ fin <- whiff_u %>% inner_join(HR_u)
 head(final)
 final %>% distinct(player_name)
 f <- final %>% 
-  filter(n>50) %>% 
+  filter(n>99) %>% 
   add_predictions(m1) %>% 
   rename(SO_perc=pred) %>% 
   add_predictions(m2) %>% 
   rename(pred_fip=pred) %>% 
   mutate(pred_fip=pred_fip*-1)
-
+#View(fin)
 f1 <- fin %>%
-  filter(n>50) %>% 
+  filter(n>99) %>% 
   add_predictions(m1) %>% 
   rename(SO_perc=pred) %>% 
   add_predictions(m2) %>% 
@@ -97,6 +98,7 @@ totals_1 <-
   mutate_if(is.numeric,percent_rank) %>% 
   write_csv("results/best-pitches-overall.csv")
 
+View(totals_1)
 
 
 #just keep rows that have 10 or more pitches
