@@ -1,4 +1,4 @@
-Generalized Additive Model to rate MLB pitcher stuff <br/>
+Generalized Additive Model to rate MLB pitcher stuff and translate it to predicted FIP based on stuff. <br/>
 1) Download and clean Statcast data (h/t to Ethan Moore and Bill Petti.) <br/>
 2) Feature selection primarily using VIF testing on predictors <br/>
 3) Fastball/Sinker models includes pitch velo, release point, batter side, spin rate, spin direction, break and plate location  <br/>
