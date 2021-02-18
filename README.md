@@ -1,4 +1,4 @@
-Expected FIP <br/>
+#Expected FIP <br/>
 This is a Generalized Additive Model (GAM) to rate MLB pitcher stuff and translate it to predicted FIP based on stuff. <br/>
 It's a GAM model grouped by pitch type and batter side that regresses HR rates and swinging strike rates based on the expected outcomes given the models below. Expected swing and miss rate is then fit to strikeout percentage. Walk rates are given from actual game data and then Expected FIP is fit from expected swinging strike rates, expected home run rates and actual walk rates. This model uses 2020 MLB season as training data. '21 season data will be used as test set and GAM will be tuned once I've got some test data.
 
