@@ -9,7 +9,6 @@ Determine how good a pitcher's stuff is and how it should translate to performan
 
 ###### The fun stuff: <br/>
 [MLB Leaders](https://github.com/joshorenstein/pitching-analysis/blob/main/results/leaderboard.pdf) <br/>
-**Team Stats** <br/>
 [Blue Jays](http://github.com/joshorenstein/pitching-analysis/blob/main/results/blue-jays.pdf) <br/>
 [Giants](http://github.com/joshorenstein/pitching-analysis/blob/main/results/giants.pdf) <br/>
 [Mariners](http://github.com/joshorenstein/pitching-analysis/blob/main/results/mariners.pdf) <br/>
