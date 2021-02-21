@@ -6,32 +6,33 @@ library(VIF)
 library(car)
 library(broom)
 
-s %>% distinct(description)
-#s <- read_csv('scraps/raw_data.csv') #if you need to read the data in 
-sp <- s 
-
-df <- sp %>%   #data for fb whiff model %>% 
-  mutate(sd_i=abs(release_pos_x*pfx_x), #create interaction variable for release side/horz break
-         ht_i=abs(release_pos_z*pfx_z)) #create interaction variable for release height/vert break
+df <- read_csv('scraps/raw_data.csv') #if you need to read the data in 
 
 df$whiff <- as.factor(df$whiff) #make the binary whiff variable a factor
 
-# Make sure that you get the same random numbers
-smp_size <- floor(1 * nrow(df)) #just going to use 2020 data as training and wait until '21 season for test data
-
 ## set the seed to make your partition reproducible
 set.seed(61919)
-train_ind <- sample(seq_len(nrow(df)), size = smp_size)
-train <-df[train_ind, ]
-#test <- df[-train_ind, ] #commented out until '21 season
+#train_ind <- sample(seq_len(nrow(df)), size = smp_size)
+train <-df
+#test <- df[-train_ind, ] #using 2020 season as train. will add 2021 season as test set
 nrow(train)/nrow(df)
 
 #Make a dataset with all the potential variables for fastball model
-train_select <- train %>% select(player_name,pitch_type,p_throws,stand,release_pos_x,
-                                 release_pos_z,release_speed,release_spin_rate,release_spin_direction,
-                                 plate_x,plate_z,pfx_x,pfx_z,whiff) %>% 
-                          mutate(release_pos_x=abs(release_pos_x),release_pos_z=abs(release_pos_z),
-                                 ht_i =release_pos_z*pfx_z,sd_i = release_pos_x*pfx_x)
+train_select <- train %>% 
+  select(player_name,pitch_type,p_throws,stand,release_pos_x,release_pos_z,release_speed,
+         release_extension,release_spin_rate,release_spin_direction,plate_x,plate_z,pfx_x,pfx_z,whiff)
+# PCA on fastballs
+train_pca <- train_select %>%
+              filter(pitch_type %in% c("FF","SI") & p_throws=="R" & stand=="R") %>% 
+              select(-c(player_name,pitch_type,p_throws,stand,whiff))
+
+#scale the data
+pr.out <- prcomp(train_pca, center = TRUE, scale. = TRUE)
+
+# Inspect model output
+summary(pr.out) #PCA doesn't seem to be applicable as it's not really reducing the data
+
+## Variance Inflation Tests to Check for MultiCollinearity
 
 #make a function to grab data on pitch type/p_throws/stand level
 f <- function(data,type,pitcher,batter){
@@ -42,41 +43,35 @@ ff_r <- f(train_select,"FF","R","R") #fastball RHP/RHB
 ff_l <- f(train_select,"FF","R","L") #fastball RHP/LHB
 si_l <- f(train_select,"SI","R","L") #sinker RHP/LHB
 
-#Variance Inflation Factor Test - RHP vs RHB
+#Variance Inflation Factor Test - RHP vs RHB Fastballs
 v_check <- glm(whiff ~ release_speed+release_pos_x+release_pos_z+
-            release_spin_rate+release_spin_direction+pfx_x+pfx_z+plate_x+plate_z+
-            sd_i+ht_i,data=ff_r, family=binomial)
+            release_spin_rate+release_extension+release_spin_direction+pfx_x+pfx_z+plate_x+plate_z,
+            data=ff_r, family=binomial)
 
-vif(v_check) #remove interaction variables because vif > 10
-
-v_check2 <- glm(whiff ~ release_speed+release_pos_x+release_pos_z+
-                 release_spin_rate+release_spin_direction+pfx_x+pfx_z+plate_x+plate_z,data=ff_r, family=binomial)
-
-vif(v_check2) #looks much better
+vif(v_check) # lookgs good
 
 #double check results - RHP vs LHB
-v_check3 <- glm(whiff ~ release_speed+release_pos_x+release_pos_z+
+v_check2 <- glm(whiff ~ release_speed+release_pos_x+release_pos_z+release_extension+
                   release_spin_rate+release_spin_direction+pfx_x+pfx_z++plate_x+plate_z,data=ff_l, family=binomial)
-vif(v_check3)
+vif(v_check2)
 #Check these results on the sinker data
-v_check4 <- glm(whiff ~ release_speed+release_pos_x+release_pos_z+
+v_check3 <- glm(whiff ~ release_speed+release_pos_x+release_pos_z+release_extension+
                   release_spin_rate+release_spin_direction+pfx_x+pfx_z+plate_x+plate_z,data=si_l, family=binomial)
 
-vif(v_check4)
-#take the interactions out of fastball models
-train_select <- train_select %>% select(-c(ht_i,sd_i))
+vif(v_check3)
 
-#Run same test for breaking balls/cutters/changeups
-df_b <- sp %>%   #data for fb whiff model %>% 
+#Run same test for breaking balls/cutters/changeups using additional variables 
+#that compare data to fastball velo and movement
+
+df_b <- df %>%   #data for fb whiff model %>% 
   mutate(pitch_type=(if_else(pitch_type == "FS","CH",if_else(pitch_type=="KC","CU",pitch_type)))) %>% 
-  filter(pitch_type %in% c("CU","SL","CH","FC")) %>% 
-  mutate(sd_i=abs(release_pos_x*pfx_x),ht_i=abs(release_pos_z*pfx_z))
+  filter(pitch_type %in% c("CU","SL","CH","FC"))
 
 #Grab potential variables for breaking ball models
-cu_train_select <- train %>% select(player_name,pitch_type,p_throws,stand,release_pos_x,
+cu_train_select <- train %>% select(player_name,pitch_type,p_throws,stand,release_pos_x,release_extension,
                                         release_pos_z,release_speed,release_spin_rate,release_spin_direction,
                                         hmov_diff,vmov_diff,velo_diff,spin_dir_diff,
-                                        pfx_x,pfx_z,whiff,sd_i,ht_i,plate_x,plate_z) %>% 
+                                        pfx_x,pfx_z,whiff,plate_x,plate_z) %>% 
                                     mutate(release_pos_x=abs(release_pos_x),release_pos_z=abs(release_pos_z))
 
 #Grab some curveball data
@@ -84,11 +79,11 @@ cu_r <- f(cu_train_select,"CU","R","R")
 cu_l <- f(cu_train_select,"CU","L","R")
 fc_l <- f(cu_train_select,"FC","R","L")
 
-v_check <- glm(whiff ~ release_speed+release_pos_x+release_pos_z+
-                 release_spin_rate+release_spin_direction+pfx_x+pfx_z+sd_i+ht_i
+v_check <- glm(whiff ~ release_speed+release_pos_x+release_pos_z+release_extension+
+                 release_spin_rate+release_spin_direction+pfx_x+pfx_z
                +hmov_diff+vmov_diff+velo_diff+spin_dir_diff+plate_x+plate_z,data=cu_r, family=binomial)
 
-vif(v_check) #remove spin_dir_diff and interactions
+vif(v_check) #remove spin_dir_diff 
 
 v_check2 <- glm(whiff ~ release_speed+release_pos_x+release_pos_z+
                   release_spin_rate+release_spin_direction+pfx_x+pfx_z
@@ -96,14 +91,14 @@ v_check2 <- glm(whiff ~ release_speed+release_pos_x+release_pos_z+
 
 vif(v_check2) #remove vmov_diff
 
-v_check3 <- glm(whiff ~ release_speed+release_pos_x+release_pos_z+
+v_check3 <- glm(whiff ~ release_speed+release_pos_x+release_pos_z+release_extension+
                   release_spin_rate+release_spin_direction+pfx_x+pfx_z
                 +hmov_diff+velo_diff+plate_x+plate_z,data=cu_r, family=binomial)
 
 vif(v_check3) #looks good 
 
 #double check with LHP
-v_check4 <- glm(whiff ~ release_speed+release_pos_x+release_pos_z+
+v_check4 <- glm(whiff ~ release_speed+release_pos_x+release_pos_z+release_extension+
                   release_spin_rate+release_spin_direction+pfx_x+pfx_z
                 +hmov_diff+velo_diff+plate_x+plate_z,data=cu_l, family=binomial)
 vif(v_check4) 
@@ -111,12 +106,12 @@ vif(v_check4)
 #Double Check Sliders
 sl_r <- f(cu_train_select,"SL","R","R")
 
-v_check5 <- glm(whiff ~ release_speed+release_pos_x+release_pos_z+
+v_check5 <- glm(whiff ~ release_speed+release_pos_x+release_pos_z+release_extension+
                   release_spin_rate+release_spin_direction+pfx_x+pfx_z
                 +hmov_diff+velo_diff+plate_x+plate_z,data=sl_r, family=binomial)
 vif(v_check5)
 
-v_check6<- glm(whiff ~ release_speed+release_pos_x+release_pos_z+
+v_check6<- glm(whiff ~ release_speed+release_pos_x+release_pos_z+release_extension+
                   release_spin_rate+release_spin_direction+pfx_x+pfx_z
                 +hmov_diff+velo_diff+plate_x+plate_z,data=sl_r, family=binomial)
 vif(v_check6)
@@ -125,27 +120,22 @@ ch_r <- f(cu_train_select,"CH","R","R")
 
 ch_l <- f(cu_train_select,"CH","R","L")
 
-v_check <- glm(whiff ~ release_speed+release_pos_x+release_pos_z+
-                 release_spin_rate+release_spin_direction+pfx_x+pfx_z+sd_i+ht_i
+v_check <- glm(whiff ~ release_speed+release_pos_x+release_pos_z+release_extension+
+                 release_spin_rate+release_spin_direction+pfx_x+pfx_z
                +hmov_diff+vmov_diff+velo_diff+spin_dir_diff+plate_x+plate_z,data=ch_r, family=binomial)
 
-vif(v_check) #remove the interactions
-
-v_check2 <- glm(whiff ~ release_speed+release_pos_x+release_pos_z+
-                  release_spin_rate+release_spin_direction+pfx_x+pfx_z
-                +hmov_diff+vmov_diff+velo_diff+spin_dir_diff+plate_x+plate_z,data=ch_r, family=binomial)
-
-vif(v_check2) #remove vmov_diff
+vif(v_check) #looks_good
 
 #check vs LHB
-v_check3 <- glm(whiff ~ release_speed+release_pos_x+release_pos_z+
+v_check2 <- glm(whiff ~ release_speed+release_pos_x+release_pos_z+release_extension+
                   release_spin_rate+release_spin_direction+pfx_x+pfx_z
                 +hmov_diff+vmov_diff+velo_diff+spin_dir_diff+plate_x+plate_z,data=ch_l, family=binomial)
-vif(v_check3)
+vif(v_check2)
 
 
 #Ideal models
-#FB MODEL: release_speed+release_pos_x+release_pos_z+release_spin_rate+release_spin_direction+pfx_x+pfx_z+plate_x+plate_z
-#CU/SL MODEL: release_speed+release_pos_x+release_pos_z+release_spin_rate+release_spin_direction+pfx_x+pfx_z+hmov_diff+velo_diff+plate_x+plate_z
-#CH MODEL: release_speed+release_pos_x+release_pos_z+release_spin_rate+release_spin_direction+pfx_x+pfx_z
-#           +hmov_diff+vmov_diff+velo_diff+spin_dir_diff+plate_x+plate_z
+#FB MODEL: release_speed+release_pos_x+release_pos_z+release_spin_rate+release_extension+release_spin_direction+pfx_x+pfx_z+plate_x+plate_z
+#CU/SL MODEL: release_speed+release_pos_x+release_pos_z+release_spin_rate+release_extension+release_spin_direction+pfx_x+pfx_z+hmov_diff+velo_diff+plate_x+plate_z
+#CH MODEL: release_speed+release_pos_x+release_pos_z+release_extension+
+#release_spin_rate+release_spin_direction+pfx_x+pfx_z
+#+hmov_diff+vmov_diff+velo_diff+spin_dir_diff+plate_x+plate_z
