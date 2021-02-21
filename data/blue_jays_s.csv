@@ -1,0 +1,24 @@
+p_throws,stand,player_name,CH,CU,FC,FF,SI,SL
+L,L,Hyun Jin Ryu,NA,0.55,NA,0.42,NA,NA
+L,L,Robbie Ray,NA,NA,NA,0.67,NA,0.26
+L,L,Ryan Borucki,NA,NA,NA,NA,0.88,0.73
+L,L,Steven Matz,NA,NA,NA,NA,0.85,NA
+L,R,Hyun Jin Ryu,0.67,0.23,0.21,0.34,0.71,NA
+L,R,Robbie Ray,NA,0.63,NA,0.48,NA,0.58
+L,R,Ryan Borucki,NA,NA,NA,NA,0.08,NA
+L,R,Steven Matz,0.3,0.65,NA,NA,0.13,NA
+R,L,Julian Merryweather,NA,NA,NA,0.86,NA,NA
+R,L,Nate Pearson,NA,NA,NA,0.89,NA,NA
+R,L,Rafael Dolis,0.97,NA,NA,NA,0.42,NA
+R,L,Ross Stripling,0.67,NA,NA,0.18,NA,NA
+R,L,Shun Yamaguchi,0.32,NA,NA,0.08,NA,NA
+R,L,Tanner Roark,0.22,0.56,NA,0.26,0.05,NA
+R,L,Tyler Chatwood,NA,NA,0.87,NA,0.54,NA
+R,R,Jordan Romano,NA,NA,NA,NA,NA,0.5
+R,R,Julian Merryweather,NA,NA,NA,0.77,NA,NA
+R,R,Nate Pearson,NA,NA,NA,0.88,NA,0.82
+R,R,Rafael Dolis,NA,NA,NA,NA,0.71,0.94
+R,R,Ross Stripling,0.05,NA,NA,0.03,NA,0.35
+R,R,Shun Yamaguchi,0.64,NA,NA,0.05,NA,0.05
+R,R,Tanner Roark,NA,0.56,NA,0.08,0.02,0.29
+R,R,Tyler Chatwood,NA,NA,NA,NA,0.54,NA

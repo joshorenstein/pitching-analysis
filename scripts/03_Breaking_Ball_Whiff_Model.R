@@ -1,21 +1,17 @@
-df <- sp %>%   #data for Breaking Ball whiff model %>% 
+df_b <- df %>%   #data for Breaking Ball whiff model %>% 
   mutate(pitch_type=(if_else(pitch_type == "FS","CH",if_else(pitch_type=="KC","CH",pitch_type)))) %>% 
-  filter(pitch_type %in% c("CU","SL","FC","CH"))
+  filter(pitch_type %in% c("CU","SL","FC","CH")) 
 
-df$whiff <- as.factor(df$whiff)
 
-# Make sure that you get the same random numbers
-smp_size <- floor(1 * nrow(df))
-
+df_b$whiff <- as.factor(df_b$whiff)
+#View(df_b)
 ## set the seed to make your partition reproductible
 set.seed(61919)
-train_ind <- sample(seq_len(nrow(df)), size = smp_size)
-train <-df[train_ind, ]
-#test <- df[-train_ind, ] comment out til '21 data 
-nrow(train)/nrow(df)
-
+train <-df_b
+#test <- df_b[-train_ind, ] #using 2020 season as train. will add 2021 season as test set
+nrow(train)/nrow(df_b)
 #Grab data for breaking ball model
-train_select <- train %>% dplyr::select(player_name,pitch_type,p_throws,stand,
+train_select <- train %>% dplyr::select(player_name,pitch_type,p_throws,stand,release_extension,
                           release_speed,release_pos_x,release_pos_z,release_spin_rate,
                           release_spin_direction,pfx_x,pfx_z,hmov_diff,velo_diff,whiff,
                           vmov_diff,spin_dir_diff,
@@ -36,7 +32,7 @@ tr <-  train_select %>%
 tr_ch <-  train_select %>%
   filter(pitch_type == "CH") %>% 
   group_by(pitch_type,p_throws,stand) %>%
-  do(fit = gam(whiff ~ release_speed+release_pos_x+release_pos_z+release_spin_rate+release_spin_direction+pfx_x+pfx_z
+  do(fit = gam(whiff ~ release_speed+release_pos_x+release_pos_z+release_spin_rate+release_extension+release_spin_direction+pfx_x+pfx_z
                +hmov_diff+vmov_diff+velo_diff+spin_dir_diff+plate_x+plate_z, data = .,family=binomial,
                method="REML",bs="re"))
 

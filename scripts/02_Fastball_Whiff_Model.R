@@ -2,25 +2,18 @@ library(tidyverse)
 library(psych)
 library(mgcv)
 options(warn=-1)
-sp <- s
-df <- sp %>%   #data for fb whiff model %>% 
-  filter(pitch_type %in% c("FF","SI")) %>% 
-  mutate(sd_i=abs(release_pos_x*pfx_x),
-         ht_i=abs(release_pos_z*pfx_z))
-
-# Make sure that you get the same random numbers
-smp_size <- floor(1 * nrow(df))
+df_a <- df %>%   #data for fb whiff model %>% 
+  filter(pitch_type %in% c("FF","SI")) 
 
 ## set the seed to make your partition reproductible
 set.seed(61919)
-train_ind <- sample(seq_len(nrow(df)), size = smp_size)
-train <-df[train_ind, ]
-#test <- df[-train_ind, ] commented out til '21 season
-nrow(train)/nrow(df)
+train <- df_a
+#test <- df[-train_ind, ] #using 2020 season as train. will add 2021 season as test set
+nrow(train)/nrow(df_a)
 
 train_select <- train %>% dplyr::select(player_name,pitch_type,p_throws,stand,release_pos_x,
                                         release_pos_z,release_speed,release_spin_rate,release_spin_direction,
-                                        hmov_diff,vmov_diff,velo_diff,spin_dir_diff,
+                                        release_extension,hmov_diff,vmov_diff,velo_diff,spin_dir_diff,
                                         pfx_x,pfx_z,whiff,plate_x,plate_z)
 
 
@@ -32,7 +25,7 @@ train_select %>%
 tr <-  train_select %>%
   filter(pitch_type %in% c("FF","SI")) %>% 
   group_by(pitch_type,p_throws,stand) %>%
-  do(fit = gam(whiff ~ release_speed+release_pos_x+release_pos_z+
+  do(fit = gam(whiff ~ release_speed+release_pos_x+release_pos_z+release_extension+
                  release_spin_rate+release_spin_direction+pfx_x+pfx_z+plate_x+plate_z, data = .,family=binomial,method="REML",bs="re"))
 
 #Add predictions to the dataset

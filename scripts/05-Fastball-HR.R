@@ -8,9 +8,7 @@ sh <- s %>% filter(events !='null')
 sh <- sh %>% mutate(HR=if_else(events=="home_run",1,0))
 sh %>% group_by(HR) %>% summarise(n=n())
 df <- sh %>%   #data for fb whiff model %>% 
-  filter(pitch_type %in% c("FF","SI")) %>% 
-  mutate(sd_i=abs(release_pos_x*pfx_x),
-         ht_i=abs(release_pos_z*pfx_z))
+  filter(pitch_type %in% c("FF","SI"))
 
 #train_ind <- sample(seq_len(nrow(df)), size = smp_size)
 
@@ -22,13 +20,13 @@ smp_size
 s
 ## set the seed to make your partition reproductible
 set.seed(61919)
-train_ind <- sample(seq_len(nrow(df)), size = smp_size)
-train <-df[train_ind, ]
-test <- df[-train_ind, ]
+#train_ind <- sample(seq_len(nrow(df)), size = smp_size)
+train <-df
+#test <- df[-train_ind, ] comment test data out til '21 
 nrow(train)/nrow(df)
 
 #View(train)
-train_select <- train %>% dplyr::select(player_name,pitch_type,p_throws,stand,release_pos_x,
+train_select <- train %>% dplyr::select(player_name,pitch_type,p_throws,stand,release_pos_x,release_extension,
                                         release_pos_z,release_speed,release_spin_rate,release_spin_direction,
                                         hmov_diff,vmov_diff,velo_diff,spin_dir_diff,
                                         pfx_x,pfx_z,HR,plate_x,plate_z)

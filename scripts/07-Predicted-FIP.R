@@ -1,4 +1,6 @@
 library(baseballr)
+library(tidyverse)
+
 
 #Keep pitchers that got more than 50 PA
 df_model <- df_m %>% filter(PA>50)
@@ -37,13 +39,15 @@ sd_target_2 <- sd(f$HR_PCT)
 mean_target_3 <- mean(f$FIP)
 sd_target_3 <- sd(f$FIP)
 
+
 #Scale current data to 2019 FIP
 df_model$whiff_rate <- mean_target + (df_model$whiff_rate - mean(df_model$whiff_rate)) * sd_target/sd(df_model$whiff_rate) 
 df_model$f_strike <- mean_target_1 + (df_model$f_strike - mean(df_model$f_strike)) * sd_target_1/sd(df_model$f_strike) 
 df_model$HR_PCT <- mean_target_2 + (df_model$HR_PCT - mean(df_model$HR_PCT)) * sd_target_2/sd(df_model$HR_PCT)
+
 df_model$f_strike <- as.numeric(df_model$f_strike)
 df_model$HR_PCT <- as.numeric(df_model$HR_PCT)
-
+#View(df_model)
 #Grab 2020 Walk Rate Data
 pitchers_20 <- daily_pitcher_bref("2020-04-01", "2020-10-03") %>% 
   fip_plus() %>% 
@@ -70,12 +74,13 @@ final <- df_model %>%
          exp_homerun_pct=round(HR_PCT*100,1),uBB_perc=round(uBB_perc*100,1)) %>% 
   dplyr::select(player_name,FIP_based_on_stuff,Predicted_FIP,exp_whiff_pct,exp_homerun_pct,uBB_perc,PA) %>% 
   arrange(FIP_based_on_stuff)
-
+head(final)
 #View(final)
 final %>% write_csv("results/results.csv")
 p <- final %>% filter(PA>=100& FIP_based_on_stuff<=3)
-
-q <- ggplot(p, aes(y = reorder(player_name, -FIP_based_on_stuff), x = FIP_based_on_stuff)) + 
-  geom_bar(stat = "identity",fill="gray")
-q + labs(x="predicted FIP based on stuff (min 100 PA)",y="pitcher")
-ggsave("results/predicted-fip.pdf", width = 6, height = 4)
+r <- final %>% filter(PA>=40)
+# q <- ggplot(p, aes(y = reorder(player_name, -FIP_based_on_stuff), x = FIP_based_on_stuff)) + 
+#   geom_bar(stat = "identity",fill="gray")
+# q
+# q + labs(x="predicted FIP based on stuff (min 100 PA)",y="pitcher")
+# ggsave("results/predicted-fip.pdf", width = 6, height = 4)

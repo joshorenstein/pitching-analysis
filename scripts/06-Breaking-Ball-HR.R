@@ -17,13 +17,12 @@ smp_size
 
 ## set the seed to make your partition reproductible
 set.seed(61919)
-train_ind <- sample(seq_len(nrow(df)), size = smp_size)
-train <-df[train_ind, ]
-test <- df[-train_ind, ]
+train <- df 
+#test <- df[-train_ind, ] comment test data out til '21
 nrow(train)/nrow(df)
 names(train)
 #Grab data for breaking ball model
-train_select <- train %>% dplyr::select(player_name,pitch_type,p_throws,stand,
+train_select <- train %>% dplyr::select(player_name,pitch_type,p_throws,stand,release_extension,
                                         release_speed,release_pos_x,release_pos_z,release_spin_rate,
                                         release_spin_direction,pfx_x,pfx_z,hmov_diff,velo_diff,HR,
                                         plate_x,plate_z,vmov_diff,spin_dir_diff) 
