@@ -28,7 +28,7 @@ Determine how good a pitcher's stuff is and how it should translate to performan
 train_select %>%
   filter(pitch_type %in% c("FF","SI")) %>% 
   group_by(pitch_type,p_throws,stand) %>%
-  do(fit = gam(whiff ~ release_speed+release_pos_x+release_pos_z+
+  do(fit = gam(whiff ~ release_speed+release_pos_x+release_pos_z+release_extension
                  release_spin_rate+release_spin_direction+pfx_x+pfx_z
                  +plate_x+plate_z, data = .,family=binomial,method="REML",bs="re"))
 ```
