@@ -16,7 +16,7 @@ Determine how good a pitcher's stuff is and how it should translate to performan
 
 ###### The scripts: <br/>
 * Download and clean Statcast data (h/t to Ethan Moore and Bill Petti. This is mostly their code.) <br/>
-* Feature selection primarily using VIF testing on predictors <br/>
+* Feature selection testing PCA and ultimately using VIF to test multicollinearity of predictors <br/>
 * Fastball/Sinker models include pitch velo, release point, batter side, spin rate, spin direction, break and plate location  <br/>
 * Breaking ball models include pitch velo, release point, batter side, spin rate, spin direction, break, plate location, and relative horizontal break and velo compared to fastball <br/>
 * Changeup models include pitch velo, release point, batter side, spin rate, spin direction, break, plate location, and relative horizontal break and velo, vert break and spin direction compared to fastball <br/>
